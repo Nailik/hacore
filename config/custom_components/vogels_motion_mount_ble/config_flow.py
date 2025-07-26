@@ -56,9 +56,9 @@ class VogelsMotionMountConfigFlow(ConfigFlow, domain=DOMAIN):
     VERSION = 1
     _input_data: dict[str, Any]
 
-    #  def __init__(self):
-    #       """Setup data."""
-    #       self.discovery_info: BluetoothServiceInfoBleak | None = None
+    def __init__(self):
+        """Setup data."""
+        self.discovery_info: BluetoothServiceInfoBleak | None = None
 
     async def async_step_user(
         self, user_input: dict[str, Any] | None = None
@@ -160,12 +160,18 @@ class VogelsMotionMountConfigFlow(ConfigFlow, domain=DOMAIN):
                 ),
             )
 
+        _LOGGER.debug(
+            "async_show_form self.discovery_info.advertisement.local_namet: %s",
+            self.discovery_info.advertisement.local_name,
+        )
         return self.async_show_form(
             step_id="confirm",
             errors=errors,
             data_schema=vol.Schema(
                 {
-                    vol.Required(CONF_NAME, default=self.discovery_info.name): str,
+                    vol.Required(
+                        CONF_NAME, default=self.discovery_info.advertisement.local_name
+                    ): str,
                     vol.Optional(CONF_PIN): selector.NumberSelector(
                         selector.NumberSelectorConfig(
                             min=0, max=9999, mode=selector.NumberSelectorMode.BOX
@@ -200,11 +206,13 @@ class VogelsMotionMountConfigFlow(ConfigFlow, domain=DOMAIN):
         except Exception:  # noqa: BLE001
             errors["base"] = "unknown"
 
+        _LOGGER.debug("Setting async_set_unique_id: %s", data)
         if not errors:
             # Validation was successful, so create a unique id for this instance of your integration
             # and create the config entry.
             await self.async_set_unique_id(data[CONF_HOST])
             self._abort_if_unique_id_configured()
+            _LOGGER.debug("Setting async_create_entry: %s", data)
             return self.async_create_entry(title=data[CONF_NAME], data=data)
 
         return errors

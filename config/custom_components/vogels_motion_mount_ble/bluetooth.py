@@ -8,11 +8,15 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 logger = logging.getLogger(__name__)
 
-async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback):
+
+async def async_setup_entry(
+    hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback
+):
     # Create an instance of your sensor entity
     handler = BluetoothDeviceHandler(entry.data["mac_address"], hass)
     # Add entity to Home Assistant
     async_add_entities(handler)
+
 
 class BluetoothDeviceHandler:
     def __init__(self, address, hass):
@@ -28,7 +32,6 @@ class BluetoothDeviceHandler:
     def register(self):
         logger.debug("register")
         self._task = self._hass.loop.create_task(self.monitor())
-
 
     async def monitor(self):
         while True:
@@ -82,17 +85,21 @@ class BluetoothDeviceHandler:
 
     async def get_distance(self):
         data = await self.client.read_gatt_char(CHAR_DISTANCE_UUID)
-        return int.from_bytes(data[0:2], 'little')
+        return int.from_bytes(data[0:2], "little")
 
     async def set_distance(self, value: int):
-        await self.client.write_gatt_char(CHAR_DISTANCE_UUID, value.to_bytes(2, 'little'))
+        await self.client.write_gatt_char(
+            CHAR_DISTANCE_UUID, value.to_bytes(2, "little")
+        )
 
     async def get_rotation(self):
         data = await self.client.read_gatt_char(CHAR_ROTATION_UUID)
-        return int.from_bytes(data[0:2], 'little', signed=True)
+        return int.from_bytes(data[0:2], "little", signed=True)
 
     async def set_rotation(self, value: int):
-        await self.client.write_gatt_char(CHAR_ROTATION_UUID, value.to_bytes(2, 'little', signed=True))
+        await self.client.write_gatt_char(
+            CHAR_ROTATION_UUID, value.to_bytes(2, "little", signed=True)
+        )
 
     async def get_presets(self):
         presets = []
@@ -100,10 +107,12 @@ class BluetoothDeviceHandler:
             raw = await self.client.read_gatt_char(uuid)
             if len(raw) < 4:
                 continue
-            distance = int.from_bytes(raw[0:2], 'little')
-            rotation = int.from_bytes(raw[2:4], 'little', signed=True)
+            distance = int.from_bytes(raw[0:2], "little")
+            rotation = int.from_bytes(raw[2:4], "little", signed=True)
             name = raw[4:].decode("utf-8", errors="ignore").strip("\x00").strip()
-            presets.append({"uuid": uuid, "distance": distance, "rotation": rotation, "name": name})
+            presets.append(
+                {"uuid": uuid, "distance": distance, "rotation": rotation, "name": name}
+            )
         return presets
 
     async def async_will_remove_from_hass(self):

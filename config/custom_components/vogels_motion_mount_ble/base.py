@@ -44,7 +44,7 @@ class ExampleBaseEntity(CoordinatorEntity):
     # ----------------------------------------------------------------------------
     _attr_has_entity_name = True
 
-    def __init__(  self, coordinator: ExampleCoordinator) -> None:
+    def __init__(self, coordinator: ExampleCoordinator) -> None:
         """Initialise entity."""
         super().__init__(coordinator)
 

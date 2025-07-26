@@ -46,6 +46,18 @@ class ExampleBinarySensor(ExampleBaseEntity, BinarySensorEntity):
     _attr_translation_key = "connection"
 
     @property
+    def name(self) -> str:
+        """Return the name of the sensor."""
+        return "connection"
+
+    @property
+    def unique_id(self) -> str:
+        """Return unique id."""
+        # All entities must have a unique id.  Think carefully what you want this to be as
+        # changing it later will cause HA to create new entities.
+        return f"{DOMAIN}-{self.coordinator.mac}-connected"
+
+    @property
     def is_on(self) -> bool:
         """Return if the binary sensor is on."""
         # This needs to enumerate to true or false
