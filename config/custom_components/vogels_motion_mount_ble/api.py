@@ -33,10 +33,14 @@ class API:
             if self.connection_changed_callback:
                 self.connection_changed_callback()
 
+    async def testConnect(self):
+        """Connect once to test if connection works."""
+        return
+
     def connect(self) -> bool:
         """Connect to api."""
         if True:
-           # self._connected = True
+            # self._connected = True
             return True
         raise APIConnectionError(
             "Error connecting to api. Invalid username or password."
