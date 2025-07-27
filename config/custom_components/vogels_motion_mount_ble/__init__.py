@@ -2,33 +2,29 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable
 from dataclasses import dataclass
 import logging
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
-from homeassistant.exceptions import ConfigEntryNotReady
-from homeassistant.helpers.device_registry import DeviceEntry, async_get
+from homeassistant.helpers.device_registry import DeviceEntry
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
-from .const import DOMAIN
 
+from .const import DOMAIN
 from .coordinator import ExampleCoordinator
 
 _LOGGER = logging.getLogger(__name__)
 
-PLATFORMS: list[Platform] = [Platform.BINARY_SENSOR, Platform.SENSOR]
+PLATFORMS: list[Platform] = [Platform.BINARY_SENSOR, Platform.SENSOR, Platform.BUTTON]
 
 type MyConfigEntry = ConfigEntry[RuntimeData]
-
 
 @dataclass
 class RuntimeData:
     """Class to hold your data."""
 
     coordinator: DataUpdateCoordinator
-
 
 async def async_setup_entry(hass: HomeAssistant, config_entry: MyConfigEntry) -> bool:
     """Set up VogelsMotionMount Integration from a config entry."""
@@ -39,13 +35,11 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: MyConfigEntry) ->
 
     # Perform an initial data load from api.
     # async_config_entry_first_refresh() is special in that it does not log errors if it fails
-    await coordinator.async_config_entry_first_refresh()
+    # todo calls coordinator _async_update_data await coordinator.async_config_entry_first_refresh()
 
-    # Test to see if api initialised correctly, else raise ConfigNotReady to make HA retry setup
-    # TODO: Change this to match how your api will know if connected or successful update
-    # if not coordinator.api.connected:
-    #    _LOGGER.exception("ConfigEntryNotReady")
-    #    raise ConfigEntryNotReady
+    # Store coordinator or data in hass.data
+    hass.data.setdefault(DOMAIN, {})
+    hass.data[DOMAIN][config_entry.entry_id] = coordinator
 
     # Initialise a listener for config flow options changes.
     # This will be removed automatically if the integraiton is unloaded.
